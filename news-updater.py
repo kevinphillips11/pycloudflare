@@ -19,4 +19,4 @@ while True:
     os.system('git config --local user.name "GitHub Action"')
     os.system('git commit -am "Updated with latest news"')
     os.system('git push')
-    time.sleep(3600) # sleep for 1 hour
+    time.sleep(10) # sleep for 1 hour
