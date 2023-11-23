@@ -1,34 +1,45 @@
-name: Run Flask app
+name: Cloudflared Flask App
 
 on:
-  workflow_dispatch:  # Allows manual run
+  workflow_dispatch:
 
 jobs:
-  run-flask-app:
-    runs-on: ubuntu-latest
-
+  build:
+    runs-on: windows-latest
+    
     steps:
-    - name: Checkout repository
+    - name: Check out code
       uses: actions/checkout@v2
-
-    - name: Set up Python
+      
+    - name: Setup Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.8  # Your Python version here
-    
+        python-version: 3.8
+
+    - name: Install cloudflared
+      run: |
+        wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe
+        ./cloudflared-windows-amd64.exe --version
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flask
-        pip install flask_cloudflared  # Your other dependencies here
+        pip install -r requirements.txt
 
-    - name: Run Flask app
+    - name: Run Flask App
       run: |
-        python app.py &
-        sleep 10  # gives the server time to start and initialize the cloudflare tunnel
-        echo "App should now be running at the Cloudflare public URL"
+        $env:FLASK_APP="app.py"
+        flask run > output.txt 2>&1 &
 
-    - name: Print Cloudflare public URL
+    - name: Extract URL and Write to file
       run: |
-        # Replace this with a command to retrieve the Cloudflare public URL if available
-        echo "The actual Cloudflare public URL should be printed here"
+        Start-Sleep -s 10
+        $content = Get-Content output.txt -Raw
+        $url = [regex]::match($content, 'https://[^\s]+.trycloudflare.com').value
+        echo $url | Out-File -FilePath public_url.txt
+
+    - name: Upload URL file
+      uses: actions/upload-artifact@v2
+      with:
+        name: url-file
+        path: public_url.txt
