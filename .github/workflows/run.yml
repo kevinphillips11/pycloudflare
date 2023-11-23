@@ -1,19 +1,31 @@
-name: Python script runner
+name: Update README
 
 on:
   workflow_dispatch:
+    inputs:
+      manual_trigger:
+        description: 'Trigger the workflow manually'
+        default: 'true'
 
 jobs:
-  build:
+  update_readme:
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.x
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.x'
-    - name: Install Git
-      run: sudo apt-get install git
-    - name: Execute Python script
+        python-version: 3.8
+
+    - name: Install dependencies
       run: |
-        python update_readme.py
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run the script
+      run: python update_readme.py
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
