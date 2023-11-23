@@ -10,7 +10,12 @@ jobs:
     steps:
     - name: Check out repository
       uses: actions/checkout@v2
-    
+      
+    - name: Install Cloudflared
+      run: |
+        wget https://bin.equinox.io/c/VdrWdbjqyF/cloudflared-stable-linux-amd64.deb
+        sudo dpkg -i cloudflared-stable-linux-amd64.deb
+
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
