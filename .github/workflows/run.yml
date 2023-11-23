@@ -1,38 +1,34 @@
-name: Run app.py and write the output to README
+name: Run Flask app
 
-# Controls when the workflow will run
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # Allows manual run
 
 jobs:
-  run-script:
+  run-flask-app:
     runs-on: ubuntu-latest
+
     steps:
-    - name: Check out repository
+    - name: Checkout repository
       uses: actions/checkout@v2
-      
-    - name: Install Cloudflared
-      run: |
-        wget https://bin.equinox.io/c/VdrWdbjqyF/cloudflared-stable-linux-amd64.deb
-        sudo dpkg -i cloudflared-stable-linux-amd64.deb
 
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.8
-
+        python-version: 3.8  # Your Python version here
+    
     - name: Install dependencies
-      run: pip install -r requirements.txt
-
-    - name: Run app.py
-      id: app
-      run: echo "::set-output name=URL::$(python app.py)"
-
-    - name: Write output to README
       run: |
-        echo "${{ steps.app.outputs.URL }}" >> README.md
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git config --global user.name "GitHub Actions"
-        git add README.md
-        git commit -m "Update README with the output URL"
-        git push
+        python -m pip install --upgrade pip
+        pip install flask
+        pip install flask_cloudflared  # Your other dependencies here
+
+    - name: Run Flask app
+      run: |
+        python app.py &
+        sleep 10  # gives the server time to start and initialize the cloudflare tunnel
+        echo "App should now be running at the Cloudflare public URL"
+
+    - name: Print Cloudflare public URL
+      run: |
+        # Replace this with a command to retrieve the Cloudflare public URL if available
+        echo "The actual Cloudflare public URL should be printed here"
