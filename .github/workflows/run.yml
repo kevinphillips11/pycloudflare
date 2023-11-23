@@ -1,0 +1,40 @@
+name: Run app.py and update README
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Run app.py
+      run: python app.py
+
+    - name: Extract address from log and update README
+      run: |
+        address=$(grep -oP '(?<=https://)[a-z0-9-]+\.trycloudflare\.com' logs.txt) || true
+        if [ -n "$address" ]; then
+          echo $address > address.txt
+          echo "Deployed site address: $address" >> README.md
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git commit -am "Update README with deployed site address"
+          git push
+        fi
+
+    - name: Keep running forever
+      run: sleep infinity
