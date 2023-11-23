@@ -11,15 +11,9 @@ jobs:
     - name: Set up Python 3.x
       uses: actions/setup-python@v2
       with:
-        python-version: 3.x
+        python-version: '3.x'
+    - name: Install Git
+      run: sudo apt-get install git
     - name: Execute Python script
       run: |
         python update_readme.py
-    - name: Commit and push if changed
-      run: |
-        git diff
-        git config --global user.email "my-bot@example.com"
-        git config --global user.name "Readme Update bot"
-        git commit -am "README Updated" || exit 0
-        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-        git push
