@@ -1,40 +1,33 @@
-name: Run app.py and update README
+name: Run app.py and write the output to README
 
+# Controls when the workflow will run
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
-  build:
+  run-script:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
+    - name: Check out repository
       uses: actions/checkout@v2
-
+    
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.x'
+        python-version: 3.8
 
     - name: Install dependencies
       run: pip install -r requirements.txt
 
     - name: Run app.py
-      run: python app.py
+      id: app
+      run: echo "::set-output name=URL::$(python app.py)"
 
-    - name: Extract address from log and update README
+    - name: Write output to README
       run: |
-        address=$(grep -oP '(?<=https://)[a-z0-9-]+\.trycloudflare\.com' logs.txt) || true
-        if [ -n "$address" ]; then
-          echo $address > address.txt
-          echo "Deployed site address: $address" >> README.md
-          git config --local user.email "actions@github.com"
-          git config --local user.name "GitHub Actions"
-          git commit -am "Update README with deployed site address"
-          git push
-        fi
-
-    - name: Keep running forever
-      run: sleep infinity
+        echo "${{ steps.app.outputs.URL }}" >> README.md
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "GitHub Actions"
+        git add README.md
+        git commit -m "Update README with the output URL"
+        git push
