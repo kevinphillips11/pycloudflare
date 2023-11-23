@@ -1,6 +1,9 @@
 import subprocess
 import time
 from datetime import datetime
+import os
+
+github_token = os.environ.get('GH_TOKEN')
 
 while True:
     now = datetime.now()
@@ -11,6 +14,9 @@ while True:
     subprocess.run(['git', 'config', '--global', 'user.email', 'my-bot@example.com'])
     subprocess.run(['git', 'config', '--global', 'user.name', 'my-bot'])
     subprocess.run(['git', 'commit', '-am', 'README updated'])
-    subprocess.run(['git', 'push'])
+    subprocess.run(['git', 'push', '-u', 'origin', 'main'])
+
+    # Use the GitHub token for authentication
+    subprocess.run(['git', 'push', '-u', 'origin', 'main'], env={'GITHUB_TOKEN': github_token})
 
     time.sleep(10)
